@@ -14,20 +14,30 @@ class RoleAndPermissionsSeeder extends Seeder
      */
     public function run(): void
     {
-        Permission::create(['name' => 'view-users']);
-        Permission::create(['name' => 'create-users']);
-        Permission::create(['name' => 'edit-users']);
-        Permission::create(['name' => 'delete-users']);
+        // Liste des permissions
+        $permissions = [
+            'view-users',
+            'create-users',
+            'edit-users',
+            'delete-users',
 
-        Permission::create(['name' => 'view-projects']);
-        Permission::create(['name' => 'create-projects']);
-        Permission::create(['name' => 'edit-projects']);
-        Permission::create(['name' => 'delete-projects']);
+            'view-projects',
+            'create-projects',
+            'edit-projects',
+            'delete-projects',
+        ];
 
-        $adminRole = Role::create(['name' => 'admin']);
-        $employeeRole = Role::create(['name' => 'employee']);
+        //Création des permissions
+        foreach ($permissions as $permission){
+            Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
+        }
 
-        $adminRole->givePermissionTo(Permission::all());
-        $employeeRole->givePermissionTo(['view-projects', 'create-projects', 'edit-projects']);
+        //Création des rôles
+        $adminRole = Role::firstOrCreate(['name' => 'Admin', 'guard_name' => 'web']);
+        $employeeRole = Role::firstOrCreate(['name' => 'Employee', 'guard_name' => 'web']);
+
+        // Attribution des permissions
+        $adminRole->syncPermissions($permissions);
+        $employeeRole->syncPermissions(['view-projects', 'create-projects', 'edit-projects']);
     }
 }
